@@ -1,5 +1,8 @@
+import json
+
 from datetime import datetime
 from airflow.decorators import dag, task
+from modules.storage.local_data_lake import LocalDataLake
 from brewery.service.brewery_extractor import BreweryExtractor
 
 @dag(
@@ -28,15 +31,27 @@ def brewery_dag():
         """
         extractor = BreweryExtractor()
         page = 1
+        file_paths = []
 
         while True:
             breweries = extractor.extract_brewery_info(items_per_page=200, page=page)
-            page += 1
             if len(breweries) == 0:
                 break
             
             print(f"Extracted {len(breweries)} breweries from page {page}")
-            # Save data on dlake
+            file_path = LocalDataLake().save_on_storage(
+                dataset='BREWERY',
+                layer='bronze',
+                file_name=f'breweries_page_{page}',
+                file_content=json.dumps(breweries, indent=4, ensure_ascii=False).encode('utf-8'),
+                file_format='json'
+            )
+
+            file_paths.append(file_path)
+            page += 1
+            break
+
+        return file_paths
 
     @task
     def transform():
