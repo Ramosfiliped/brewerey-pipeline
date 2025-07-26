@@ -1,4 +1,4 @@
-# brewrey-pipeline
+# brewerey-pipeline
 
 docker compose up airflow-init
 
