@@ -1,6 +1,6 @@
 from datetime import datetime
 from airflow.decorators import dag, task
-
+from brewery.service.brewery_extractor import BreweryExtractor
 
 @dag(
     start_date=datetime(2025, 7, 26),
@@ -18,11 +18,21 @@ from airflow.decorators import dag, task
 def brewery_dag():
     @task
     def start():
-        print("Logging the start of the DAG")
+        print("Starting the brewery extraction DAG")
 
     @task
     def extract():
-        print("Extracting")
+        extractor = BreweryExtractor()
+        page = 1
+
+        while True:
+            breweries = extractor.extract_brewery_info(items_per_page=200, page=page)
+            page += 1
+            if len(breweries) == 0:
+                break
+            
+            print(f"Extracted {len(breweries)} breweries from page {page}")
+            # Save data on dlake
 
     @task
     def transform():
