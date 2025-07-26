@@ -18,16 +18,24 @@ from airflow.decorators import dag, task
 def brewery_dag():
     @task
     def start():
-        print("Starting the brewery DAG")
+        print("Logging the start of the DAG")
 
     @task
-    def brew_beer():
-        print("Brewing beer...")
+    def extract():
+        print("Extracting")
+
+    @task
+    def transform():
+        print("Transforming")
+
+    @task
+    def load():
+        print("Loading")
 
     @task
     def finish():
-        print("Finishing the brewing process")
+        print("Logging the end of the DAG")
 
-    start() >> brew_beer() >> finish()
+    start() >> extract() >> transform() >> load() >> finish()
 
 brewery_dag()
