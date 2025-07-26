@@ -1,10 +1,12 @@
 import requests
 
 class BreweryExtractor:
-    def extract_brewery_info(self, items_per_page=3, page=1):
+    def extract_brewery_info(self, items_per_page: int = 3, page: int = 1) -> dict:
         """
-        Extract brewery information from the brewery API and save
-        on data lake on bronze layer
+        Extract brewery information from the brewery API
+        Args:
+            items_per_page (int): Number of items to fetch per page
+            page (int): Page number to fetch
         """
 
         response = requests.get(

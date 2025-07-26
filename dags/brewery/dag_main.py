@@ -22,6 +22,10 @@ def brewery_dag():
 
     @task
     def extract():
+        """
+            Extract brewery information from the brewery API and save
+            on data lake on bronze layer
+        """
         extractor = BreweryExtractor()
         page = 1
 
