@@ -1,7 +1,9 @@
 import json
+import pandas as pd
 
 from datetime import datetime
 from airflow.decorators import dag, task
+from brewery.service.brewery_loader import BreweryLoader
 from modules.storage.local_data_lake import LocalDataLake
 from brewery.service.brewery_extractor import BreweryExtractor
 from brewery.service.brewery_transform import BreweryTransform
@@ -50,7 +52,6 @@ def brewery_dag():
 
             file_paths.append(file_path)
             page += 1
-            break # REMOVER break para continuar a extração
 
         return file_paths
 
@@ -74,18 +75,55 @@ def brewery_dag():
 
     @task
     def load(transformed_files: list):
-        print("Loading")
+        loader = BreweryLoader()
+        aggregated_files = []
+        """
+            Load the transformed brewery data and create an aggregated view
+            with the quantity of breweries per type and location.
+        """
+        country_files = {}
+        for file_path in transformed_files:
+            country = file_path.split('/')[2]
+            if country not in country_files:
+                country_files[country] = []
+            country_files[country].append(file_path)
+        
+        for country, file_paths in country_files.items():
+            print(f"Processando país: {country}")
+            
+            country_dfs = []
+            
+            for file_path in file_paths:
+                aggregated_view = loader.load_brewery_data(file_path)
+                country_dfs.append(aggregated_view)
+            
+            if country_dfs:
+                combined_df = pd.concat(country_dfs, ignore_index=True)
+                
+                final_aggregated = combined_df.groupby(['brewery_type', 'country']).agg({
+                    'count': 'sum'
+                }).reset_index()
+                
+                aggregated_file_path = LocalDataLake().save_on_storage(
+                    dataset='BREWERY',
+                    layer='gold',
+                    file_name=f'aggregated_{country}',
+                    file_content=final_aggregated.to_parquet(index=False),
+                    file_format='parquet'
+                )
+                aggregated_files.append(aggregated_file_path)
+        
+        return aggregated_files
 
     @task
     def finish():
         print("Logging the end of the DAG")
 
-    _start = start()
     extracted_files = extract()
     transformed_files = transform(extracted_files)
     _load = load(transformed_files)
     _finish = finish()
 
-    _start >> _load >> _finish
+    start() >> _load >> _finish
 
 brewery_dag()
