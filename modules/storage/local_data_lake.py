@@ -41,3 +41,16 @@ class LocalDataLake(Datalake):
         
         with open(complete_file_path, mode, encoding='utf-8' if mode == 'w' else None) as f:
             f.write(file_content)
+    
+    def retrieve_data(self, file_name: str) -> bytes:
+        """
+        Retrieve raw file content from the local data lake.
+
+        :param file_name: Name of the file to retrieve.
+        :return: Raw file content as bytes.
+        :raises: FileNotFoundError if the file doesn't exist
+        """
+        file_path = os.path.join(self.base_path, file_name)
+        with open(file_path, 'rb') as f:
+            return f.read()
+        raise FileNotFoundError(f"File {file_name} not found in the data lake.")

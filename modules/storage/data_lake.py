@@ -27,7 +27,7 @@ class Datalake(ABC):
             file_format (str): Format of the file (default is 'json').
             file_path (str): Directory path where the file will be saved.
         """
-        pass
+        raise NotImplementedError("This method should be implemented by subclasses.")
 
     def save_on_storage(
         self,
@@ -59,6 +59,7 @@ class Datalake(ABC):
         )
         return f"{file_path}/{file_name}.{file_format}"
 
+    @abstractmethod
     def retrieve_data(self, file_name: str) -> bytes:
         """
         Retrieve raw file content from the local data lake.
@@ -67,7 +68,4 @@ class Datalake(ABC):
         :return: Raw file content as bytes.
         :raises: FileNotFoundError if the file doesn't exist
         """
-        file_path = os.path.join(self.base_path, file_name)
-        with open(file_path, 'rb') as f:
-            return f.read()
-        raise FileNotFoundError(f"File {file_name} not found in the data lake.")
+        raise NotImplementedError("This method should be implemented by subclasses.")
