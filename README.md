@@ -16,3 +16,9 @@ The login and password is **airflow**.
 On the left side has and menu.
 Click on Dags, then brewery_dag and trigger.
 The files will be created on the dlake foulder on your PC.
+
+## Run Tests
+```bash
+docker build -t brewery-tests -f tests/Dockerfile .
+docker run -t --rm brewery-tests
+```
