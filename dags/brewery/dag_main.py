@@ -4,6 +4,7 @@ from datetime import datetime
 from airflow.decorators import dag, task
 from modules.storage.local_data_lake import LocalDataLake
 from brewery.service.brewery_extractor import BreweryExtractor
+from brewery.service.brewery_transform import BreweryTransform
 
 @dag(
     start_date=datetime(2025, 7, 26),
@@ -49,22 +50,42 @@ def brewery_dag():
 
             file_paths.append(file_path)
             page += 1
-            break
+            break # REMOVER break para continuar a extração
 
         return file_paths
 
     @task
-    def transform():
-        print("Transforming")
+    def transform(raw_file_paths: list):
+        transformer = BreweryTransform()
+        transformed_files = []
+        for index, file_path in enumerate(raw_file_paths):
+            transformed_dfs = transformer.transform_brewery_data(file_path)
+            for country, df in transformed_dfs.items():
+                transformed_file_path = LocalDataLake().save_on_storage(
+                    dataset=f'BREWERY/{country}',
+                    layer='silver',
+                    file_name=f'transformed_{index}',
+                    file_content=df.to_parquet(),
+                    file_format='parquet'
+                )
+                transformed_files.append(transformed_file_path)
+        
+        return transformed_files
 
     @task
-    def load():
+    def load(transformed_files: list):
         print("Loading")
 
     @task
     def finish():
         print("Logging the end of the DAG")
 
-    start() >> extract() >> transform() >> load() >> finish()
+    _start = start()
+    extracted_files = extract()
+    transformed_files = transform(extracted_files)
+    _load = load(transformed_files)
+    _finish = finish()
+
+    _start >> _load >> _finish
 
 brewery_dag()

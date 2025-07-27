@@ -50,11 +50,25 @@ class LocalDataLake(Datalake):
         :return: Raw file content as bytes.
         :raises: FileNotFoundError if the file doesn't exist
         """
-        # Se file_name já contém o caminho completo (começa com 'dlake/')
         if file_name.startswith('dlake/'):
-            complete_file_path = os.path.join(os.getcwd(), file_name)
+            possible_paths = [
+                os.path.join(os.getcwd(), file_name),
+                os.path.join(os.path.dirname(os.getcwd()), file_name),
+            ]
+            
+            complete_file_path = None
+            for path in possible_paths:
+                if os.path.exists(path):
+                    complete_file_path = path
+                    break
+            
+            if complete_file_path is None:
+                file_name_only = file_name.split('/')[-1]
+                for root, dirs, files in os.walk(os.getcwd()):
+                    if file_name_only in files:
+                        complete_file_path = os.path.join(root, file_name_only)
+                        break
         else:
-            # Assume que file_name é o caminho relativo completo
             complete_file_path = file_name
         
         if not os.path.exists(complete_file_path):
