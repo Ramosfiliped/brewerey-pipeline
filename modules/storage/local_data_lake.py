@@ -28,7 +28,7 @@ class LocalDataLake(Datalake):
             file_format (str): Format of the file.
             file_path (str): Directory path where the file will be saved.
         """
-        full_path = os.path.join(os.getcwd(), 'dlake', layer, dataset, file_path)
+        full_path = os.path.join(os.getcwd(), 'dlake', file_path)
         
         os.makedirs(full_path, exist_ok=True)
         
@@ -50,7 +50,15 @@ class LocalDataLake(Datalake):
         :return: Raw file content as bytes.
         :raises: FileNotFoundError if the file doesn't exist
         """
-        file_path = os.path.join(self.base_path, file_name)
-        with open(file_path, 'rb') as f:
+        # Se file_name já contém o caminho completo (começa com 'dlake/')
+        if file_name.startswith('dlake/'):
+            complete_file_path = os.path.join(os.getcwd(), file_name)
+        else:
+            # Assume que file_name é o caminho relativo completo
+            complete_file_path = file_name
+        
+        if not os.path.exists(complete_file_path):
+            raise FileNotFoundError(f"File {complete_file_path} not found in the data lake.")
+        
+        with open(complete_file_path, 'rb') as f:
             return f.read()
-        raise FileNotFoundError(f"File {file_name} not found in the data lake.")
