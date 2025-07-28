@@ -19,6 +19,8 @@ class BreweryTransform:
         file = LocalDataLake().retrieve_data(file_name=f"dlake/{file_path}")
         raw_data = json.loads(file.decode('utf-8'))
         df = pd.DataFrame(raw_data)
+        if df.empty:
+            return pd.DataFrame({})
         unique_countries = df['country'].unique()
 
         country_dfs = {}

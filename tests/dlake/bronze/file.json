@@ -1,0 +1,23 @@
+[
+    {
+        "id": "1",
+        "name": "Brewery A",
+        "brewery_type": "micro",
+        "country": "United States",
+        "city": "New York"
+    },
+    {
+        "id": "2",
+        "name": "Brewery B",
+        "brewery_type": "regional",
+        "country": "United States",
+        "city": "Chicago"
+    },
+    {
+        "id": "3",
+        "name": "Brewery C",
+        "brewery_type": "brewpub",
+        "country": "Canada",
+        "city": "Toronto"
+    }
+]
