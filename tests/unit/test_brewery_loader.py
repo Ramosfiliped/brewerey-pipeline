@@ -1,8 +1,6 @@
 import pytest
 import pandas as pd
-from unittest.mock import Mock, patch, MagicMock
-import io
-from modules.storage.local_data_lake import LocalDataLake
+from unittest.mock import patch
 from dags.brewery.service.brewery_loader import BreweryLoader
 
 class TestBreweryLoader:
