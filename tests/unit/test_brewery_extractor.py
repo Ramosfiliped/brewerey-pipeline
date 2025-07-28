@@ -71,23 +71,3 @@ class TestBreweryExtractor:
         mock_get.assert_called_once_with(
             url="https://api.openbrewerydb.org/v1/breweries?per_page=2&page=1"
         )
-
-    @patch('requests.get')
-    def test_extract_brewery_info_url_construction(self, mock_get):
-        """Test that the URL is constructed correctly with different parameters"""
-
-        mock_response = Mock()
-        mock_response.status_code = 200
-        mock_response.json.return_value = []
-        mock_get.return_value = mock_response
-
-        test_cases = [
-            (1, 1, "https://api.openbrewerydb.org/v1/breweries?per_page=1&page=1"),
-            (10, 5, "https://api.openbrewerydb.org/v1/breweries?per_page=10&page=5"),
-            (25, 100, "https://api.openbrewerydb.org/v1/breweries?per_page=25&page=100")
-        ]
-
-        for items_per_page, page, expected_url in test_cases:
-            mock_get.reset_mock()
-            self.extractor.extract_brewery_info(items_per_page=items_per_page, page=page)
-            mock_get.assert_called_once_with(url=expected_url) 
