@@ -6,6 +6,7 @@ Data pipeline for brewery extract in ETL format using Airflow
 
 ### Init Airflow
 ```bash
+docker compose run airflow-cli airflow config list
 docker compose up airflow-init
 docker compose up
 ```
