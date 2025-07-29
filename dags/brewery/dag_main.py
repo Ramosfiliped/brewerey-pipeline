@@ -23,10 +23,6 @@ from brewery.service.brewery_transform import BreweryTransform
 )
 def brewery_dag():
     @task
-    def start():
-        print("Starting the brewery extraction DAG")
-
-    @task
     def extract():
         """
             Extract brewery information from the brewery API and save
@@ -115,15 +111,8 @@ def brewery_dag():
         
         return aggregated_files
 
-    @task
-    def finish():
-        print("Logging the end of the DAG")
-
     extracted_files = extract()
     transformed_files = transform(extracted_files)
     _load = load(transformed_files)
-    _finish = finish()
-
-    start() >> _load >> _finish
 
 brewery_dag()
